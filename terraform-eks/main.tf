@@ -1,23 +1,23 @@
 # Configure AWS Provider
 provider "aws" {
   region = var.aws_region
-  profile = "vs-terraform-eks"
-
-  assume_role {
-    role_arn = "arn:aws:iam::010438464212:role/TerraformExecutionRole"
-    session_name = "vs-terraform-eks"
-  }
-
-  default_tags {
-    tags = {
-      Environment = var.environment
-      Project     = var.project_name
-      ManagedBy   = "Terraform"
-    }
-  }
 }
 
 data "aws_caller_identity" "current" {}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      # This requires the awscli to be installed locally where Terraform is executed
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
+    }
+  }
+}
 
 # Configure Kubernetes provider
 provider "kubernetes" {
@@ -27,31 +27,13 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region, "--profile", "vs-terraform-eks"]
-  }
-}
-
-# Configure Helm provider
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args = [
-        "eks", "get-token",
-        "--cluster-name", module.eks.cluster_name,
-        "--region", var.aws_region,
-        "--profile", "vs-terraform-eks"
-      ]
-    }
+    # This requires the awscli to be installed locally where Terraform is executed
+    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
   }
 }
 
 locals {
-  cluster_name = "aic-aimlops-eks"
+  cluster_name = var.cluster_name
   region = var.aws_region
 
   ##### VPC #####
@@ -154,7 +136,7 @@ locals {
   
   tags = {
     Blueprint  = local.cluster_name
-    GithubRepo = "github.com/kimsw7/aic-gitops-bridge"
+    GithubRepo = "github.com/gitops-bridge-dev/gitops-bridge"
     Environment = var.environment
     Project     = var.project_name
   }
@@ -172,6 +154,8 @@ module "gitops_bridge_bootstrap" {
     metadata = local.addons_metadata
     addons   = local.addons
   }
+
+  depends_on = [module.eks]
 }
 
 ################################################################################
@@ -207,6 +191,8 @@ module "eks_blueprints_addons" {
   enable_aws_gateway_api_controller   = local.aws_addons.enable_aws_gateway_api_controller
 
   tags = local.tags
+
+  depends_on = [module.eks]
 }
 
 # Create EKS cluster
