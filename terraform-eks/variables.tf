@@ -52,7 +52,6 @@ variable "private_subnet_cidrs" {
   default     = ["10.62.100.0/22", "10.62.104.0/22"]
 }
 
-
 variable "addons" {
   description = "Kubernetes addons"
   type        = any
@@ -60,19 +59,21 @@ variable "addons" {
     enable_aws_load_balancer_controller = true
     enable_aws_ebs_csi_resources        = true # generate gp2 and gp3 storage classes for ebs-csi
     enable_metrics_server               = true
+    enable_argo_rollouts                = true
   }
 }
 
- # Addons Git
+##### GitOps Bridge #####
+# Addons Git
 variable "gitops_addons_org" {
   description = "Git repository org/user contains for addons"
   type        = string
-  default     = "https://github.com/gitops-bridge-dev"
+  default     = "https://github.com/kimsw7"
 }
 variable "gitops_addons_repo" {
   description = "Git repository contains for addons"
   type        = string
-  default     = "gitops-bridge-argocd-control-plane-template"
+  default     = "aic-gitops-bridge"
 }
 variable "gitops_addons_revision" {
   description = "Git repository revision/branch/ref for addons"
@@ -82,7 +83,7 @@ variable "gitops_addons_revision" {
 variable "gitops_addons_basepath" {
   description = "Git repository base path for addons"
   type        = string
-  default     = ""
+  default     = "aic-k8s-addons/"
 }
 variable "gitops_addons_path" {
   description = "Git repository path for addons"
@@ -94,12 +95,12 @@ variable "gitops_addons_path" {
 variable "gitops_workload_org" {
   description = "Git repository org/user contains for workload"
   type        = string
-  default     = "https://github.com/gitops-bridge-dev"
+  default     = "https://github.com/kimsw7"
 }
 variable "gitops_workload_repo" {
   description = "Git repository contains for workload"
   type        = string
-  default     = "gitops-bridge"
+  default     = "aic-gitops-bridge"
 }
 variable "gitops_workload_revision" {
   description = "Git repository revision/branch/ref for workload"
@@ -109,24 +110,25 @@ variable "gitops_workload_revision" {
 variable "gitops_workload_basepath" {
   description = "Git repository base path for workload"
   type        = string
-  default     = "argocd/iac/terraform/examples/eks/"
+  default     = "aic-k8s-workloads/"
 }
 variable "gitops_workload_path" {
   description = "Git repository path for workload"
   type        = string
   default     = "getting-started/k8s"
 }
-# ##### GitOps Bridge #####
+
+# ######## Demo Repo ########
 # # Addons Git
 # variable "gitops_addons_org" {
 #   description = "Git repository org/user contains for addons"
 #   type        = string
-#   default     = "https://github.com/kimsw7"
+#   default     = "https://github.com/gitops-bridge-dev"
 # }
 # variable "gitops_addons_repo" {
 #   description = "Git repository contains for addons"
 #   type        = string
-#   default     = "aic-gitops-bridge"
+#   default     = "gitops-bridge-argocd-control-plane-template"
 # }
 # variable "gitops_addons_revision" {
 #   description = "Git repository revision/branch/ref for addons"
@@ -136,7 +138,7 @@ variable "gitops_workload_path" {
 # variable "gitops_addons_basepath" {
 #   description = "Git repository base path for addons"
 #   type        = string
-#   default     = "aic-k8s-addons/"
+#   default     = ""
 # }
 # variable "gitops_addons_path" {
 #   description = "Git repository path for addons"
@@ -148,12 +150,12 @@ variable "gitops_workload_path" {
 # variable "gitops_workload_org" {
 #   description = "Git repository org/user contains for workload"
 #   type        = string
-#   default     = "https://github.com/kimsw7"
+#   default     = "https://github.com/gitops-bridge-dev"
 # }
 # variable "gitops_workload_repo" {
 #   description = "Git repository contains for workload"
 #   type        = string
-#   default     = "aic-gitops-bridge"
+#   default     = "gitops-bridge"
 # }
 # variable "gitops_workload_revision" {
 #   description = "Git repository revision/branch/ref for workload"
@@ -163,7 +165,7 @@ variable "gitops_workload_path" {
 # variable "gitops_workload_basepath" {
 #   description = "Git repository base path for workload"
 #   type        = string
-#   default     = "aic-k8s-workloads/"
+#   default     = "argocd/iac/terraform/examples/eks/"
 # }
 # variable "gitops_workload_path" {
 #   description = "Git repository path for workload"

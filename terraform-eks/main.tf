@@ -1,6 +1,11 @@
 # Configure AWS Provider
 provider "aws" {
   region = var.aws_region
+
+  assume_role {
+    role_arn = "arn:aws:iam::010438464212:role/TerraformExecutionRole"
+    session_name = "vs-terraform-eks"
+  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -14,7 +19,12 @@ provider "helm" {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
+      args = [
+        "eks", "get-token",
+        "--cluster-name", module.eks.cluster_name,
+        "--region", local.region,
+        "--role-arn", "arn:aws:iam::010438464212:role/TerraformExecutionRole"
+      ]
     }
   }
 }
@@ -28,7 +38,12 @@ provider "kubernetes" {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
     # This requires the awscli to be installed locally where Terraform is executed
-    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
+    args = [
+      "eks", "get-token",
+      "--cluster-name", module.eks.cluster_name,
+      "--region", local.region,
+      "--role-arn", "arn:aws:iam::010438464212:role/TerraformExecutionRole"
+    ]
   }
 }
 
@@ -94,7 +109,7 @@ locals {
     enable_argo_workflows                  = try(var.addons.enable_argo_workflows, false)
     enable_cluster_proportional_autoscaler = try(var.addons.enable_cluster_proportional_autoscaler, false)
     enable_gatekeeper                      = try(var.addons.enable_gatekeeper, false)
-    enable_gpu_operator                    = try(var.addons.enable_gpu_operator, false)
+    enable_gpu_operator                    = try(var.addons.enable_gpu_operator, true)
     enable_ingress_nginx                   = try(var.addons.enable_ingress_nginx, false)
     enable_keda                            = try(var.addons.enable_keda, false)
     enable_kyverno                         = try(var.addons.enable_kyverno, false)
@@ -210,11 +225,12 @@ module "eks" {
 
   eks_managed_node_groups = {
     general = {
-      desired_capacity = 1
+      desired_capacity = 2
       max_capacity     = 3
       min_capacity     = 1
+      # force_update_version = true
 
-      instance_types = ["t3.small"]
+      instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
 
       subnet_ids = aws_subnet.private[*].id
@@ -249,8 +265,33 @@ module "eks" {
     }
   }
 
+  access_entries = {
+    terraform_exec = {
+      principal_arn     = "arn:aws:iam::010438464212:role/TerraformExecutionRole"
+      type              = "STANDARD"
+      kubernetes_groups = ["eks-admins"]
+      policy_associations = [
+        {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        },
+        {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      ]
+    }
+  }
+
+  authentication_mode = "API_AND_CONFIG_MAP"
+
   tags = local.tags
 }
+
 
 # Create IAM role for EBS CSI Driver
 module "ebs_csi_driver_irsa" {
@@ -270,7 +311,6 @@ module "ebs_csi_driver_irsa" {
 
   tags = local.tags
 }
-
 
 
 ################################################################################
@@ -326,6 +366,7 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = data.aws_internet_gateway.existing.id
   }
+
 
   tags = {
     Name = "${local.cluster_name}-public-rt"

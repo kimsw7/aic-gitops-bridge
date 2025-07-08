@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -uo pipefail
+set -u pipefail
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOTDIR="$(cd ${SCRIPTDIR}/../..; pwd )"
@@ -13,7 +13,7 @@ terraform -chdir=$SCRIPTDIR output -raw configure_kubectl > "$TMPFILE"
 if [[ ! $(cat $TMPFILE) == *"No outputs found"* ]]; then
   source "$TMPFILE"
   kubectl delete -n argocd applicationset workloads
-  kubectl delete -n game-2048 ingress game-2048
+  # kubectl delete -n game-2048 ingress game-2048
   kubectl delete -n argocd applicationset cluster-addons
   kubectl delete -n argocd applicationset addons-argocd
   kubectl delete -n argocd svc argo-cd-argocd-server
@@ -22,5 +22,5 @@ fi
 terraform destroy -target="module.gitops_bridge_bootstrap" -auto-approve
 terraform destroy -target="module.eks_blueprints_addons" -auto-approve
 terraform destroy -target="module.eks" -auto-approve
-terraform destroy -target="module.vpc" -auto-approve
+# terraform destroy -target="module.vpc" -auto-approve
 terraform destroy -auto-approve
