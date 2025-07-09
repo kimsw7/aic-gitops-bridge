@@ -16,13 +16,8 @@ spec:
       project: default
       source:
         repoURL: '{{metadata.annotations.addons_repo_url}}'
-        # path: '{{metadata.annotations.addons_repo_basepath}}{{metadata.annotations.addons_repo_path}}'
-        path: 'aic-k8s-workloads/apps/aic-demo-api'
+        path: 'aic-k8s-workloads/apps/aic-demo-api/overlays/prod'  # ✅ kustomization.yaml 있는 위치
         targetRevision: '{{metadata.annotations.addons_repo_revision}}'
-        helm:
-          valueFiles:
-            # - $values/aic-demo-api/values.yaml
-            - values.yaml
       destination:
         name: '{{name}}'
         namespace: aic-demo-api
@@ -30,4 +25,3 @@ spec:
         automated:
           prune: true
           selfHeal: true
-

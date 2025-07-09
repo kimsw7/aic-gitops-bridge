@@ -1,0 +1,8 @@
+resources:
+  - ../../base
+
+images:
+  - name: 010438464212.dkr.ecr.ap-northeast-2.amazonaws.com/aic-demo-api
+    newTag: latest
+
+namespace: aic-demo-api
