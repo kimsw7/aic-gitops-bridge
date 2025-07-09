@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aic-demo-api-kustomize
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kimsw7/eks-terraform.git
+    targetRevision: HEAD
+    path: aic-k8s-workloads/apps/aic-demo-api/overlays/prod   # <-- 여기에 kustomization.yaml이 있어야 함
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aic-demo-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
