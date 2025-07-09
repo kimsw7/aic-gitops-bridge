@@ -1,66 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
+kind: Application
 metadata:
-  name: workloads-aic-demo-api
+  name: aic-demo-api-kustomize
+  namespace: argocd
 spec:
+  project: default
+  source:
+    repoURL: https://github.com/kimsw7/aic-gitops-bridge.git
+    targetRevision: HEAD
+    path: aic-k8s-workloads/apps/aic-demo-api/overlays/prod   # <-- 여기에 kustomization.yaml이 있어야 함
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aic-demo-api
   syncPolicy:
-    preserveResourcesOnDeletion: true
-  generators:
-    - merge:
-        mergeKeys: [server]
-        generators:
-          - clusters:
-              values:
-                addonChart: aic-demo-api
-                kustomizePath: apps/aic-demo-api/overlays/prod
-                # addonChartNamespace: kube-system
-                # anything not staging or prod use this version
-                addonChartVersion: main
-                addonChartRepository: https://github.com/kimsw7/aic-gitops-bridge.git
-              selector:
-                matchExpressions:
-                  - key: enable_aic-demo-api
-                    operator: In
-                    values: ['true']
-          - clusters:
-              selector:
-                matchLabels:
-                  environment: staging
-              values:
-                addonChartVersion: main
-          - clusters:
-              selector:
-                matchLabels:
-                  environment: prod
-              values:
-                addonChartVersion: main
-  template:
-    metadata:
-      name: addon-{{name}}-{{values.addonChart}}
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
-    spec:
-      project: default
-      sources:
-        - path: '{{values.kustomizePath}}/base'
-          repoURL: '{{values.addonChartRepository}}'
-          targetRevision: '{{values.addonChartVersion}}'
-        # additional resources
-        # - repoURL: '{{metadata.annotations.workloads_repo_url}}'
-        #   targetRevision: '{{metadata.annotations.workloads_repo_revision}}'
-        #   path: '{{metadata.annotations.workloads_repo_basepath}}additional_resources/workloads/{{values.addonChart}}'
-      destination:
-        # namespace: '{{values.addonChart}}'
-        name: '{{name}}'
-      syncPolicy:
-        automated: 
-          prune: true
-          selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply=true  # Big CRDs.
-      ignoreDifferences:
-      - group: admissionregistration.k8s.io
-        kind: MutatingWebhookConfiguration
-        jsonPointers:
-          - /webhooks/0/matchConditions
+    automated:
+      prune: true
+      selfHeal: true
