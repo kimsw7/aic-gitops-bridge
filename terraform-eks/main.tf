@@ -109,7 +109,7 @@ locals {
     enable_argo_workflows                  = try(var.addons.enable_argo_workflows, false)
     enable_cluster_proportional_autoscaler = try(var.addons.enable_cluster_proportional_autoscaler, false)
     enable_gatekeeper                      = try(var.addons.enable_gatekeeper, false)
-    enable_gpu_operator                    = try(var.addons.enable_gpu_operator, true)
+    enable_gpu_operator                    = try(var.addons.enable_gpu_operator, false)
     enable_ingress_nginx                   = try(var.addons.enable_ingress_nginx, false)
     enable_keda                            = try(var.addons.enable_keda, false)
     enable_kyverno                         = try(var.addons.enable_kyverno, false)
@@ -225,10 +225,12 @@ module "eks" {
 
   eks_managed_node_groups = {
     general = {
-      desired_capacity = 2
-      max_capacity     = 3
-      min_capacity     = 1
-      # force_update_version = true
+      # desired_capacity = 2
+      # max_capacity     = 3
+      # min_capacity     = 1
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
 
       instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
@@ -239,7 +241,7 @@ module "eks" {
         Environment = var.environment
         Project     = var.project_name
       }
-
+      force_update_version = true
       tags = {
         ExtraTag = "eks-node-group"
       }
@@ -288,7 +290,6 @@ module "eks" {
   }
 
   authentication_mode = "API_AND_CONFIG_MAP"
-
   tags = local.tags
 }
 
