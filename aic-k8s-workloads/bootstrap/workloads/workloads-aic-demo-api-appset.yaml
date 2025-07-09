@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: aic-demo-api-appset
-  namespace: aic-demo-api
+  namespace: argocd
 spec:
   generators:
     - clusters:
