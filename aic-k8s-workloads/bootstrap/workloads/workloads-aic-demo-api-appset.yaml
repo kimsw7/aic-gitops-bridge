@@ -10,12 +10,13 @@ spec:
             enable_app: "true"
   template:
     metadata:
-      name: fastapi-{{name}}
+      name: '{{name}}'
     spec:
       project: default
       source:
         repoURL: '{{metadata.annotations.addons_repo_url}}'
-        path: '{{metadata.annotations.addons_repo_basepath}}{{metadata.annotations.addons_repo_path}}'
+        # path: '{{metadata.annotations.addons_repo_basepath}}{{metadata.annotations.addons_repo_path}}'
+        path: 'aic-k8s-workloads/apps/aic-demo-api'
         targetRevision: '{{metadata.annotations.addons_repo_revision}}'
         helm:
           valueFiles:
