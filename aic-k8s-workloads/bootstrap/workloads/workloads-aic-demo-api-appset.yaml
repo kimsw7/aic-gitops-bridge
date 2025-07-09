@@ -21,7 +21,8 @@ spec:
         targetRevision: '{{metadata.annotations.addons_repo_revision}}'
         helm:
           valueFiles:
-            - $values/aic-demo-api/values.yaml
+            # - $values/aic-demo-api/values.yaml
+            - aic-k8s-workloads/apps/aic-demo-api/values.yaml
       destination:
         name: '{{name}}'
         namespace: aic-demo-api
