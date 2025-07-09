@@ -22,7 +22,7 @@ spec:
         helm:
           valueFiles:
             # - $values/aic-demo-api/values.yaml
-            - aic-k8s-workloads/apps/aic-demo-api/values.yaml
+            - values.yaml
       destination:
         name: '{{name}}'
         namespace: aic-demo-api
