@@ -9,9 +9,9 @@ spec:
     repoURL: https://github.com/kimsw7/aic-gitops-bridge.git
     targetRevision: HEAD
     path: aic-k8s-workloads/apps/aic-demo-api/overlays/prod   # <-- 여기에 kustomization.yaml이 있어야 함
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: aic-demo-api
+    destination:
+      namespace: aic-demo-api
+      name: aic-demo-api-kustomize
   syncPolicy:
     automated:
       prune: true
