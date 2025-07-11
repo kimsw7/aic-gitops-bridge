@@ -6,7 +6,7 @@ metadata:
   namespace: argocd
 spec:
   syncPolicy:
-    preserveResourcesOnDeletion: true
+    preserveResourcesOnDeletion: false
   generators:
     - merge:
         mergeKeys: [server]
@@ -39,6 +39,8 @@ spec:
   template:
     metadata:
       name: workload-{{name}}-{{values.workloadName}}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
       sources:
@@ -55,3 +57,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true 
+        retry:
+          backoff:
+            duration: 1m
+          limit: 60
