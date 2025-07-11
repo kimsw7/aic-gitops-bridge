@@ -46,10 +46,12 @@ spec:
           targetRevision: '{{metadata.annotations.workloads_repo_revision}}'
           path: '{{values.workloadPath}}/overlays/{{values.environment}}'
       destination:
-        namespace: '{{values.workloadName}}-{{values.environment}}'
+        # namespace: '{{values.workloadName}}-{{values.environment}}'
         name: '{{name}}'
       syncPolicy:
-        automated: {}
+        automated:
+          prune: true
+          selfHeal: true
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true 
