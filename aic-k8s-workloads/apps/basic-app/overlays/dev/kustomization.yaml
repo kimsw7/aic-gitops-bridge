@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: basic-app-dev
+
+patches:
+  - target:
+      kind: Deployment
+      name: basic-app
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: add
+        path: /metadata/labels/environment
+        value: dev
+
+images:
+  - name: nginx
+    newTag: latest 

@@ -1,0 +1,54 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: basic-app-workload
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - merge:
+        mergeKeys: [server]
+        generators:
+          - clusters:
+              values:
+                workloadName: basic-app
+                workloadPath: apps/basic-app
+                environment: dev
+              selector:
+                matchExpressions:
+                  - key: akuity.io/argo-cd-cluster-name
+                    operator: NotIn
+                    values: [in-cluster]
+                  - key: enable_basic_app
+                    operator: In
+                    values: ['true']
+          - clusters:
+              selector:
+                matchLabels:
+                  environment: staging
+              values:
+                environment: staging
+          - clusters:
+              selector:
+                matchLabels:
+                  environment: prod
+              values:
+                environment: prod
+  template:
+    metadata:
+      name: workload-{{name}}-{{values.workloadName}}
+    spec:
+      project: default
+      sources:
+        - repoURL: '{{metadata.annotations.workloads_repo_url}}'
+          targetRevision: '{{metadata.annotations.workloads_repo_revision}}'
+          path: '{{values.workloadPath}}/overlays/{{values.environment}}'
+      destination:
+        namespace: '{{values.workloadName}}-{{values.environment}}'
+        name: '{{name}}'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true 
