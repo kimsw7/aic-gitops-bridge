@@ -19,8 +19,8 @@ spec:
               selector:
                 matchExpressions:
                   - key: akuity.io/argo-cd-cluster-name
-                    operator: In
-                    values: [aic-aimlops-eks-dev]
+                    operator: NotIn
+                    values: [in-cluster]
                   # - key: enable_basic_app
                   #   operator: In
                   #   values: ['true']
