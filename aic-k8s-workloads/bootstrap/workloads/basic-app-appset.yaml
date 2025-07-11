@@ -17,6 +17,8 @@ spec:
                 workloadPath: aic-k8s-workloads/apps/basic-app
                 environment: dev
               selector:
+                matchLabels:
+                  environment: dev
                 matchExpressions:
                   - key: akuity.io/argo-cd-cluster-name
                     operator: NotIn
@@ -44,8 +46,8 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: '{{metadata.annotations.workloads_repo_url}}'
-          targetRevision: '{{metadata.annotations.workloads_repo_revision}}'
+        - repoURL: '{{metadata.annotations.workload_repo_url}}'
+          targetRevision: '{{metadata.annotations.workload_repo_revision}}'
           path: '{{values.workloadPath}}/overlays/{{values.environment}}'
       destination:
         # namespace: '{{values.workloadName}}-{{values.environment}}'
