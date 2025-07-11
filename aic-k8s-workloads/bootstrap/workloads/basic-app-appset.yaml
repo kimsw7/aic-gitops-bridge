@@ -14,7 +14,7 @@ spec:
           - clusters:
               values:
                 workloadName: basic-app
-                workloadPath: apps/basic-app
+                workloadPath: aic-k8s-workloads/apps/basic-app
                 environment: dev
               selector:
                 matchExpressions:
